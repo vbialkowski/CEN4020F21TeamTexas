@@ -53,18 +53,25 @@ def menu():
         print("\t I was able to graduate and find a starting job as the lead Senior VP of Programming at NASA.")
         print('\t It would not be possible without InCollege."')
 
+    if signedIn:
+        number_of_requests = countRequests()
+        if number_of_requests == 1:
+            print("You have 1 pending request!\n")
+        if number_of_requests > 1:
+            print(f"You have {number_of_requests} pending requests!")
+
     print("\nMenu")
     print("[1] Log In")
     print("[2] Create an Account")
     print("[3] Search for a Job")
     print("[4] Find Someone You Know")
-    print("[5] List of Friends")
-    print("[6] See Friend Requests")
-    print("[7] Learn a New Skill")
-    print("[8] Not Sure About InCollege? Watch this Video!")
-    print("[9] Useful Links")
-    print("[10] InCollege Important Links")
-    print("[11] Personal Profile")
+    print("[5] Learn a New Skill")
+    print("[6] Not Sure About InCollege? Watch this Video!")
+    print("[7] Useful Links")
+    print("[8] InCollege Important Links")
+    print("[9] Personal Profile")
+    print("[10] Show My Network")
+    print("[11] See Friend Requests")
     print("[12] Exit the Program")
 
     option = int(input("Enter your option: "))
@@ -78,20 +85,20 @@ def menu():
     elif option == 4:
         findSomeone()
     elif option == 5:
-        seeListOfFriends()
-    elif option == 6:
-        seeFriendRequests()
-    elif option == 7:
         learnSkill()
-    elif option == 8:
+    elif option == 6:
         print("Video is now playing")
         menu()
-    elif option == 9:
+    elif option == 7:
         usefulLinks()
-    elif option == 10:
+    elif option == 8:
         ImportantLinks()
-    elif option == 11:
+    elif option == 9:
         personalProfile()
+    elif option == 10:
+        seeListOfFriends()
+    elif option == 11:
+        seeFriendRequests()
     elif option == 12:
         return
     else:
@@ -154,6 +161,7 @@ def create(accCount):
             if filesize == 0:
                 file = open("Login.txt", "a")
                 friendsfile = open("list_of_friends.txt", "a")
+                requestsfile = open("friend_requests.txt", "a")
                 file.write(firstName)
                 # separate user info in file with space
                 file.write("\t")
@@ -161,6 +169,7 @@ def create(accCount):
                 file.write("\t")
                 file.write(username)
                 friendsfile.write(username+"\n")
+                requestsfile.write(username + "\n")
                 file.write("\t")
                 file.write(password)
                 file.write("\t")
@@ -224,6 +233,7 @@ def create(accCount):
                 file.write("\n")
                 file.close()
                 friendsfile.close()
+                requestsfile.close()
                 print("\nAccount Created.\nNow You Can Log-In!")
                 menu()
                 return
@@ -240,12 +250,14 @@ def create(accCount):
 
                 file = open("Login.txt", "a")
                 friendsfile = open("list_of_friends.txt", "a")
+                requestsfile = open("friend_requests.txt", "a")
                 file.write(firstName)
                 file.write("\t")
                 file.write(lastName)
                 file.write("\t")
                 file.write(username)
-                friendsfile.write(username)
+                friendsfile.write(username+"\n")
+                requestsfile.write(username + "\n")
                 file.write("\t")
                 file.write(password)
                 file.write("\t")
@@ -309,6 +321,7 @@ def create(accCount):
                 file.write("\n")
                 file.close()
                 friendsfile.close()
+                requestsfile.close()
                 print("\nAccount Created.\nNow You Can Log-In!")
                 menu()
                 return
@@ -394,7 +407,7 @@ def login():  # login function
             pass
         # if the user and password input matches any of the ones stored proceed to log-in
         elif username == info[2] and password == info[3]:
-            print("\nYou Have Successfully Logged In")
+            print("\nYou Have Successfully Logged In\n")
             signedIn = True
             current_Name = info[0] + " " + info[1]
             firstName = info[0]
@@ -574,38 +587,329 @@ def seeListOfFriends():
             user_friends = line.split(",")
             if userName == user_friends[0] or userName+"\n" == user_friends[0]:
                 friends = user_friends[1:]
-                if len(friends) > 0:
-                    print("\nThis is your list of friends!\n")
-                    for friend in friends:
-                        print("- ", friend)
-                    print("\n What do you want to do now?")
-                    print("   [1] Add a friend!")
-                    print("   [2] Go back to menu\n")
-                    flag = True
-                    while flag:
-                        try:
-                            choice = int(input("Enter Your Option: "))
-                            if choice == 1:
+
+                print("\nThis is your list of friends!\n")
+                for friend in friends:
+                    print("- ", friend)
+                print("\n What do you want to do now?")
+                print("   [1] Add a friend!")
+                print("   [2] Disconnect with a friend")
+                print("   [3] See profile of a friend")
+                print("   [4] Go back to menu\n")
+                flag = True
+                while flag:
+                    try:
+                        choice = int(input("Enter Your Option: "))
+                        if choice == 1:
+                            # here goes Dylan's function
+                            flag = False
+                            searchForStudents()
+                            menu()
+                            return
+                        if choice == 2:
+                            dis_friend = input("Type the user you want to disconnect with: ")
+                            if dis_friend in friends or dis_friend+"\n" in friends:
                                 flag = False
-                                findSomeone()
+                                disconnectSomeone(dis_friend)
+                                seeListOfFriends()
                                 return
-                            if choice == 2:
+                            else:
+                                print("This contact is not part of your Network!")
+                        if choice == 3:
+                            pro_friend = input("Type the user you want to see the profile: ")
+                            if pro_friend in friends or pro_friend + "\n" in friends:
                                 flag = False
-                                menu()
+                                viewProfileOfFriend(pro_friend)
+                                seeListOfFriends()
                                 return
-                            if choice != 1 and choice != 2:
-                                print("You can only write options 1 and 2")
-                        except ValueError:
-                            print("Your option should only be an integer!")
+                            else:
+                                print("This user is not in your network or does not exist!\n"
+                                      "You can not see this profile.")
+                        if choice == 4:
+                            flag = False
+                            menu()
+                            return
+                        if choice < 1 or choice > 4:
+                            print("You can only write options 1 to 4")
+                    except ValueError:
+                        print("Your option should only be an integer!")
                 else:
                     print("\nYou don't have friends yet!")
+                break
+    else:
+        print("\nYou have not logged in! ")
+    file.close()
+    menu()
+    return
+
+def seeFriendRequests():
+    global signedIn
+    global userName
+
+    file = open("friend_requests.txt", "r+")
+
+    if signedIn:
+        content = []
+        for line in file:
+            user_requests = line.split((","))
+            if userName == user_requests[0] or userName+"\n" == user_requests[0]:
+                requests = user_requests[1:]
+                if len(requests) > 0:
+                    print("\nThese are your friend requests!\n")
+                    for request in requests:
+                        sender_status = request.split(":")
+                        if sender_status[1] == "s" or sender_status[1] == "s\n":
+                            print(f"You have a friend request from {sender_status[0]} \n")
+                            print("What do you want to do?\n")
+                            print("[1] Accept")
+                            print("[2] Reject")
+                            print("[3] Ignore\n")
+                            flag = True
+                            while flag:
+                                try:
+                                    choice = int(input("Enter Your Option: "))
+                                    if choice == 1:
+                                        sender_status[1] = "a"
+                                        result = sender_status[0]+":"+sender_status[1]
+                                        line = line.replace(request, result)
+                                        line = line + "\n"
+                                        flag = False
+                                        acceptFriend(sender_status[0], userName)
+
+                                    elif choice == 2:
+                                        sender_status[1] = "r"
+                                        result = sender_status[0] + ":" + sender_status[1]
+                                        line = line.replace(request, result)
+                                        line = line + "\n"
+                                        flag = False
+                                    elif choice == 3:
+                                        flag = False
+                                    if choice != 1 and choice != 2 and choice != 3:
+                                        print("You can only write options 1, 2 or 3")
+                                except ValueError:
+                                    print("Your option should only be an integer!")
+            content.append(line)
+        file = open("friend_requests.txt", "w")
+        file.writelines(content)
+        file.close()
     else:
         print("\nYou have not logged in! ")
     menu()
     return
 
-def seeFriendRequests():
-    return
+def acceptFriend(sender, recipient):
+    file = open("list_of_friends.txt", "r+")
+    content = []
+    for line in file:
+        user = line.split(",")
+        if user[0] == sender or user[0] == sender+"\n":
+            line = line[0:len(line)-1] + "," + recipient
+            line = line + "\n"
+        if user[0] == recipient or user[0] == recipient+"\n":
+            line = line[0:len(line)-1] + "," + sender
+            line = line + "\n"
+        content.append(line)
+    file = open("list_of_friends.txt", "w")
+    file.writelines(content)
+    file.close()
+    result = f"{sender} is now your new friend!\n"
+    print(result)
+
+def countRequests():
+    global userName
+    file = open("friend_requests.txt", "r")
+    count = 0
+    for line in file:
+        user_requests = line.split(",")
+        if userName == user_requests[0] or userName + "\n" == user_requests[0]:
+            requests = user_requests[1:]
+            if len(requests) > 0:
+                for request in requests:
+                    sender_status = request.split(":")
+                    if sender_status[1] == "s" or sender_status[1] == "s\n":
+                        count += 1
+    return count
+
+def disconnectSomeone(friend):
+    global userName
+    file = open("list_of_friends.txt", "r+")
+    content = []
+    for line in file:
+        user = line.split(",")
+        if user[0] == userName or user[0] == userName + "\n":
+            line = line.replace(","+friend, "")
+        if user[0] == friend or user[0] == friend + "\n":
+            line = line.replace(","+userName, "")
+        content.append(line)
+    file = open("list_of_friends.txt", "w")
+    file.writelines(content)
+    file.close()
+    result = f"{friend} has been removed from your network!\n"
+    print(result)
+
+def createANewFriendRequest(matchesStack, choice):
+    infoArray = matchesStack[choice - 1]
+    requestToAdd = "," + userName + ":s" + '\n'
+    i = 0
+    lineNumber = 0
+    tempLine = ""
+    data = [""] * 1
+    with open('friend_requests.txt', 'r') as file:
+        for line in file:
+            data.append(line)
+            if line.startswith(infoArray[2]) or line == infoArray[2]:
+                tempLine = line
+                tempLine = tempLine.rstrip("\n")
+                tempLine = tempLine + requestToAdd
+                lineNumber = i
+            i += 1
+    data.remove('')
+    file.close()
+
+    data[lineNumber] = tempLine
+    with open('friend_requests.txt', 'w') as file:
+        file.writelines(data)
+
+    print("requestSent!")
+
+
+def makeFriendSelection(numberOfChoices):
+    it_is = False
+    while not it_is:
+        try:
+            userInput = int(input("\nEnter the number corresponding with the student you'd like to send a friend request to: "))
+            it_is = True
+        except ValueError:
+            print("Your input should only be an integer!")
+        if it_is:
+            if (userInput < 1) or (userInput > numberOfChoices):
+                it_is = False
+                print("Please Enter a number that corresponds to a given choice")
+    return userInput
+
+
+def searchByLastName():
+    global userName
+    enteredName = input("\nEnter the Last Name you are searching for: ")
+    matchesStack = []
+    with open('Login.txt', 'r') as file:
+        for line in file:  # Line Scope
+            if line != "\n":
+                wordStack = line.split()
+                if wordStack[1] == enteredName and wordStack[2] != userName:  # you can't be friends with yourself
+                    matchesStack.append(wordStack)
+
+    length = len(matchesStack)
+    if length == 0:
+        print("There are no matches, returning...")
+        searchForStudents()
+        return
+    print("The matches to your search are shown below: ")
+    i = 0
+    while i < length:
+        print("[" + str(i + 1) + "]" + " " + matchesStack[i][0] + " " + matchesStack[i][1] + " School:", end=' ')
+        innerLength = len(matchesStack[i])
+        j = 0
+        while j < innerLength:
+            if matchesStack[i][j] == "School:":
+                k = 1
+                while matchesStack[i][j + k] != "Years:":
+                    print(matchesStack[i][j + k], end=' ')
+                    k += 1
+            j += 1
+        print(" ")
+        i += 1
+    choice = -1
+    if len(matchesStack) > 0:
+        choice = makeFriendSelection(len(matchesStack))
+    createANewFriendRequest(matchesStack, choice)
+
+
+def searchByUniversity():
+    global userName
+    enteredUniversity = input("\nEnter the University you are searching for: ")
+    matchesStack = []
+    with open('Login.txt', 'r') as file:
+        for line in file:  # Line Scope
+            if line != "\n":
+                tabStack = line.split("\t")
+                if tabStack[30] == ("School: " + enteredUniversity) and tabStack[2] != userName:
+                    matchesStack.append(tabStack)
+
+    length = len(matchesStack)
+    if length == 0:
+        print("There are no matches, returning...")
+        searchForStudents()
+        return
+    i = 0
+    while i < length:
+        print("[" + str(i + 1) + "]" + " " + matchesStack[i][0] + " " + matchesStack[i][1] + " " + matchesStack[i][
+            30] + " " + matchesStack[i][31])
+        i += 1
+    choice = -1
+    if len(matchesStack) > 0:
+        choice = makeFriendSelection(len(matchesStack))
+
+
+def searchByMajor():
+    global userName
+    enteredMajor = input("\nEnter the Major you are searching for: ")
+    matchesStack = []
+    with open('Login.txt', 'r') as file:
+        for line in file:  # Line Scope
+            if line != "\n":
+                tabStack = line.split("\t")
+                if tabStack[31] == ("Degree: " + enteredMajor) and tabStack[2] != userName:
+                    matchesStack.append(tabStack)
+
+    length = len(matchesStack)
+    if length == 0:
+        print("There are no matches, returning...")
+        searchForStudents()
+        return
+    i = 0
+    while i < length:
+        print("[" + str(i + 1) + "]" + " " + matchesStack[i][0] + " " + matchesStack[i][1] + " " + matchesStack[i][
+            30] + " " + matchesStack[i][31])
+        i += 1
+    choice = -1
+
+    if len(matchesStack) > 0:
+        choice = makeFriendSelection(len(matchesStack))
+    createANewFriendRequest(matchesStack, choice)
+
+
+def searchForStudents():
+    print("\nChoose whether to search for students in the database by the following:")
+    print("[1] Last Name")
+    print("[2] University")
+    print("[3] Major")
+    print("[4] Go Back to Menu")
+
+    option = input("Enter your option: ")
+    it_is = False
+    try:
+        int(option)
+        it_is = True
+    except ValueError:
+        it_is = False
+    if it_is:
+        option = int(option)
+        if option == 1:
+            searchByLastName()
+        elif option == 2:
+            searchByUniversity()
+        elif option == 3:
+            searchByMajor()
+        elif option == 4:
+            menu()
+            return
+        else:
+            print("Invalid option.")
+            searchForStudents()
+    else:
+        print("Invalid option.")
+        searchForStudents()
 
 # learn a skill page
 def learnSkill():
@@ -1465,6 +1769,49 @@ def viewProfile():
     personalProfile()
     return
 
+def viewProfileOfFriend(friend):
+    file = open("Login.txt", "r")
+    for line in file:
+        user_info = line.split("\t")
+        if user_info[2] == friend:
+            title = user_info[8]
+            major = user_info[9]
+            uni = user_info[10]
+            about_user = user_info[11]
+            if title != "None" or major != "None" or uni != "None" or about_user != "None":
+                print(f"\n {user_info[0]} {user_info[1]}")
+                print("Title: " + title)
+                print("Major: " + major)
+                print("University: " + uni)
+                print("About: " + about_user)
+                print("\nJob Experience1")
+                print(user_info[12])
+                print(user_info[13])
+                print(user_info[14])
+                print(user_info[15])
+                print(user_info[16])
+                print(user_info[17])
+                print("\nJob Experience2")
+                print(user_info[18])
+                print(user_info[19])
+                print(user_info[20])
+                print(user_info[21])
+                print(user_info[22])
+                print(user_info[23])
+                print("\nJob Experience3")
+                print(user_info[24])
+                print(user_info[25])
+                print(user_info[26])
+                print(user_info[27])
+                print(user_info[28])
+                print(user_info[29])
+                print("\nEducation")
+                print(user_info[30])
+                print(user_info[31])
+                print(user_info[32] + "\n")
+            else:
+                print(f"You can not see this profile because {friend} has not created a profile yet!")
+
 
 # create log-in text file if it does not exist
 loginFile = "Login.txt"
@@ -1484,4 +1831,21 @@ else:
     createFile = open("Job_Posts.txt", "a")
     createFile.close()
 # display menu
+
+friendFile = "list_of_friends.txt"
+friendPath = Path(friendFile)
+if friendPath.is_file():
+    pass
+else:
+    createFile = open("list_of_friends.txt", "a")
+    createFile.close()
+requestFile = "friend_requests.txt"
+requestPath = Path(requestFile)
+if requestPath.is_file():
+    pass
+else:
+    createFile = open("friend_requests.txt", "a")
+    createFile.close()
+
+
 menu()
